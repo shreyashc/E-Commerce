@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 const dotenv = require("dotenv").config();
 const app = express();
 
@@ -6,7 +7,11 @@ require("./db/connectMongo")();
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.post("/", (req, res) => {
+
+const { storage } = require("./helpers/ImageStorage");
+const upload = multer({ storage });
+
+app.post("/", upload.single("file"), (req, res) => {
   console.log(req.body);
   res.send("ok");
 });
