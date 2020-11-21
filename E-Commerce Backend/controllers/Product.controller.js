@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
+const createError = require("http-errors");
 const Product = require("../models/Product.model");
-const gfs = require("../helpers/ImageStorage");
-var fs = require("fs");
-var path = require("path");
+const fs = require("fs");
+const path = require("path");
+
 module.exports = {
+  /**
+   * get all product
+   */
   getAllProducts: async (req, res, next) => {
     try {
       const products = await Product.find({}).lean();
@@ -17,16 +21,18 @@ module.exports = {
     try {
       const product = await Product.findById(productId);
       if (!product) {
-        res.status(400).send();
+        throw createError(404, "product not found");
       }
       res.send(product);
     } catch (error) {
       if (error instanceof mongoose.CastError) {
-        res.status(400).send();
-        return;
+        throw createError(400, "Bad Request");
       }
     }
   },
+  /**
+   * create a product
+   */
   createAProduct: async (req, res, next) => {
     const {
       title,
@@ -36,9 +42,12 @@ module.exports = {
       inStock,
       categories,
     } = req.body;
-    const image_buffer = fs.readFileSync(
-      path.join(__dirname + "/../uploads/" + req.file.filename)
-    );
+    let image_buffer;
+    if (req.file) {
+      image_buffer = fs.readFileSync(
+        path.join(__dirname + "/../uploads/" + req.file.filename)
+      );
+    }
     const product = new Product({
       title,
       short_desc,
@@ -47,19 +56,69 @@ module.exports = {
       inStock,
       categories,
       image: {
-        data: image_buffer,
-        contentType: req.file.mimetype,
+        data: image_buffer || null,
+        contentType: req.file ? req.file.mimetype : null,
       },
     });
     const result = await product.save();
     res.send(result);
   },
+
+  /**
+   * update a product
+   */
+
   updateAProduct: async (req, res, next) => {
+    const productId = req.params.id;
+    console.log(req);
     try {
-    } catch (error) {}
+      let update = req.body;
+      let image;
+      if (req.file) {
+        const image_buffer = fs.readFileSync(
+          path.join(__dirname + "/../uploads/" + req.file.filename)
+        );
+        image = {
+          data: image_buffer || null,
+          contentType: req.file ? req.file.mimetype : null,
+        };
+        update.image = image;
+      }
+      console.log(update);
+      const result = await Product.findByIdAndUpdate(productId, update, {
+        new: true,
+      });
+      if (!result) {
+        throw createError(404, "product not found");
+      }
+      res.send(result);
+    } catch (error) {
+      console.log(error.message);
+      if (error instanceof mongoose.CastError) {
+        return next(createError(400, "Bad request"));
+      }
+
+      next(error);
+    }
   },
+  /**
+   * delete a product
+   */
   deleteAProduct: async (req, res, next) => {
     try {
-    } catch (error) {}
+      let product = await Product.findById(req.params.id);
+
+      if (!product) {
+        throw createError(404, "product not found");
+      }
+      const result = await Product.deleteOne(product);
+      res.send(result);
+    } catch (error) {
+      if (error instanceof mongoose.CastError) {
+        next(createError(400, "Bad Request"));
+        return;
+      }
+      next(error);
+    }
   },
 };

@@ -1,5 +1,5 @@
 const express = require("express");
-const multer = require("multer");
+const createError = require("http-errors");
 const dotenv = require("dotenv").config();
 const app = express();
 
@@ -10,7 +10,21 @@ app.use(express.json());
 
 const productRoutes = require("./routes/product.routes");
 
-app.use("/product", productRoutes);
+app.use("/products", productRoutes);
+
+app.use((req, res, next) => {
+  next(createError(404, "Not Found"));
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.send({
+    status: err.status || 500,
+    message: err.message,
+  });
+  console.log(err.message);
+});
+
 app.listen(
   process.env.PORT || 1337,
   console.log("E-commerce server up on PORT:" + process.env.PORT || 1337)
