@@ -22,8 +22,9 @@ const ProductSchema = new Schema({
     type: Boolean,
     default: true,
   },
-  categories: {
-    type: [String],
+  category: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "category",
   },
   image: {
     data: Buffer,

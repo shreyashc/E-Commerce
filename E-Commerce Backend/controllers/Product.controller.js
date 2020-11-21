@@ -70,7 +70,6 @@ module.exports = {
 
   updateAProduct: async (req, res, next) => {
     const productId = req.params.id;
-    console.log(req);
     try {
       let update = req.body;
       let image;
