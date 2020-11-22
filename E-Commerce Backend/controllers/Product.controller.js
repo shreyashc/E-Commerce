@@ -83,7 +83,6 @@ module.exports = {
         };
         update.image = image;
       }
-      console.log(update);
       const result = await Product.findByIdAndUpdate(productId, update, {
         new: true,
       });

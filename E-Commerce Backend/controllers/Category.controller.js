@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const createError = require("http-errors");
 const Category = require("../models/Category.model");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = {
   getAllCategory: async (req, res, next) => {
@@ -24,22 +26,42 @@ module.exports = {
   },
   createACategory: async (req, res, next) => {
     try {
-      const { title } = req.body;
-      const category = new Category({ title });
+      const { title, description } = req.body;
+      let image_buffer;
+      if (req.file) {
+        image_buffer = fs.readFileSync(
+          path.join(__dirname + "/../uploads/" + req.file.filename)
+        );
+      }
+      const category = new Category({
+        title,
+        description,
+        image: {
+          data: image_buffer || null,
+          contentType: req.file ? req.file.mimetype : null,
+        },
+      });
       const result = await category.save();
       res.send(result);
     } catch (err) {}
   },
   updateACategory: async (req, res, next) => {
     try {
-      const { title } = req.body;
-      const result = await Category.findByIdAndUpdate(
-        req.params.id,
-        { title },
-        {
-          new: true,
-        }
-      );
+      let update = req.body;
+      let image;
+      if (req.file) {
+        const image_buffer = fs.readFileSync(
+          path.join(__dirname + "/../uploads/" + req.file.filename)
+        );
+        image = {
+          data: image_buffer || null,
+          contentType: req.file ? req.file.mimetype : null,
+        };
+        update.image = image;
+      }
+      const result = await Category.findByIdAndUpdate(req.params.id, update, {
+        new: true,
+      });
       if (!result) {
         throw createError(404, "category not found");
       }
