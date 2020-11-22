@@ -4,6 +4,8 @@ const Product = require("../models/Product.model");
 const fs = require("fs");
 const path = require("path");
 
+//TODO: req data validation
+
 module.exports = {
   /**
    * get all product
@@ -19,15 +21,17 @@ module.exports = {
   getProductById: async (req, res, next) => {
     const productId = req.params.id;
     try {
-      const product = await Product.findById(productId);
+      const product = await Product.findById(productId).lean();
       if (!product) {
         throw createError(404, "product not found");
       }
       res.send(product);
     } catch (error) {
       if (error instanceof mongoose.CastError) {
-        throw createError(400, "Bad Request");
+        next(createError(400, "Bad Request"));
+        return;
       }
+      next(error);
     }
   },
   /**
@@ -85,7 +89,7 @@ module.exports = {
       }
       const result = await Product.findByIdAndUpdate(productId, update, {
         new: true,
-      });
+      }).lean();
       if (!result) {
         throw createError(404, "product not found");
       }

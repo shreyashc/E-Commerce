@@ -9,8 +9,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 const productRoutes = require("./routes/product.routes");
-
+const categoryRoutes = require("./routes/category.routes");
 app.use("/products", productRoutes);
+app.use("/categories", categoryRoutes);
 
 app.use((req, res, next) => {
   next(createError(404, "Not Found"));
@@ -22,7 +23,6 @@ app.use((err, req, res, next) => {
     status: err.status || 500,
     message: err.message,
   });
-  console.log(err.message);
 });
 
 app.listen(
