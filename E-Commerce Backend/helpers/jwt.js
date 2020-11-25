@@ -36,12 +36,43 @@ module.exports = {
       next();
     });
   },
+
+  generateRefreshToken: (userId) => {
+    return new Promise((resolve, reject) => {
+      const payload = {};
+      const secret = process.env.REF_TOKEN_SECRET;
+      const options = {
+        expiresIn: "1y",
+        issuer: "shreyashc.com",
+        audience: userId,
+      };
+      JWT.sign(payload, secret, options, async (err, token) => {
+        if (err) {
+          reject(createError.InternalServerError());
+        }
+        const dbRefresh = new RefreshToken({
+          user: userId,
+          token: token,
+          expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        });
+        await dbRefresh.save();
+        resolve(token);
+      });
+    });
+  },
+
   verifyRefreshToken: (token) => {
     return new Promise((reslove, reject) => {
-      JWT.verify(token, process.env.REF_TOKEN_SECRET, (err, payload) => {
+      JWT.verify(token, process.env.REF_TOKEN_SECRET, async (err, res) => {
         if (err) return reject(createError.Unauthorized());
-        const userId = payload.aud;
-        RefreshToken.findOne({ userId });
+        const user = payload.aud;
+        const rToken = await RefreshToken.findOne({ user });
+        if (rToken) {
+          if (rToken === res) {
+            reslove(user);
+          }
+        }
+        reject(createError.Unauthorized());
       });
     });
   },
