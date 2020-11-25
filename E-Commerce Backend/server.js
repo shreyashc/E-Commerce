@@ -10,7 +10,9 @@ app.use(express.json());
 
 const productRoutes = require("./routes/product.routes");
 const categoryRoutes = require("./routes/category.routes");
+const authRoutes = require("./routes/auth.routes");
 app.use("/products", productRoutes);
+app.use("/auth", authRoutes);
 app.use("/categories", categoryRoutes);
 
 app.use((req, res, next) => {

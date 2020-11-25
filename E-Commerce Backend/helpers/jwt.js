@@ -1,6 +1,7 @@
 const JWT = require("jsonwebtoken");
 const createError = require("http-errors");
 const RefreshToken = require("../models/RefreshToken.model");
+const dotenv = require("dotenv").config({ path: __dirname + "../.env" });
 module.exports = {
   generateAccessToken: (userId) => {
     return new Promise((resolve, reject) => {
@@ -12,8 +13,8 @@ module.exports = {
         audience: userId,
       };
       JWT.sign(payload, secret, options, (err, token) => {
-        if (error) {
-          console.log(error.message);
+        if (err) {
+          console.log(err.message);
           reject(createError.InternalServerError());
           return;
         }
@@ -50,6 +51,10 @@ module.exports = {
         if (err) {
           reject(createError.InternalServerError());
         }
+
+        //delete old
+        await RefreshToken.findOneAndDelete({ user: userId });
+
         const dbRefresh = new RefreshToken({
           user: userId,
           token: token,
@@ -63,13 +68,15 @@ module.exports = {
 
   verifyRefreshToken: (token) => {
     return new Promise((reslove, reject) => {
-      JWT.verify(token, process.env.REF_TOKEN_SECRET, async (err, res) => {
+      JWT.verify(token, process.env.REF_TOKEN_SECRET, async (err, payload) => {
         if (err) return reject(createError.Unauthorized());
-        const user = payload.aud;
-        const rToken = await RefreshToken.findOne({ user });
+
+        const userId = payload.aud;
+        const rToken = await RefreshToken.findOne({ user: userId });
+
         if (rToken) {
-          if (rToken === res) {
-            reslove(user);
+          if (token === rToken.token) {
+            reslove(userId);
           }
         }
         reject(createError.Unauthorized());
