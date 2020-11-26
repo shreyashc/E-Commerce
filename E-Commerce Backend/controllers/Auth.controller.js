@@ -1,5 +1,6 @@
 const User = require("../models/User.model");
 const createError = require("http-errors");
+const RefreshToken = require("../models/RefreshToken.model");
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -62,6 +63,13 @@ module.exports = {
   },
   logout: async (req, res, next) => {
     try {
-    } catch (error) {}
+      const { refreshToken } = req.body;
+      if (!refreshToken) throw createError.BadRequest();
+      const userId = await verifyRefreshToken(refreshToken);
+      await RefreshToken.findOneAndDelete({ user: userId });
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
   },
 };
