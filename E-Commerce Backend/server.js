@@ -11,9 +11,11 @@ app.use(express.json());
 const productRoutes = require("./routes/product.routes");
 const categoryRoutes = require("./routes/category.routes");
 const authRoutes = require("./routes/auth.routes");
+const cartRoutes = require("./routes/cart.routes");
 app.use("/products", productRoutes);
 app.use("/auth", authRoutes);
 app.use("/categories", categoryRoutes);
+app.use("/cart", cartRoutes);
 
 app.use((req, res, next) => {
   next(createError(404, "Not Found"));

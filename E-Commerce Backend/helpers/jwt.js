@@ -2,6 +2,9 @@ const JWT = require("jsonwebtoken");
 const createError = require("http-errors");
 const RefreshToken = require("../models/RefreshToken.model");
 const dotenv = require("dotenv").config({ path: __dirname + "../.env" });
+
+//TODO: check refresh tokens expiry and delete them before gen new one.
+
 module.exports = {
   generateAccessToken: (userId) => {
     return new Promise((resolve, reject) => {
