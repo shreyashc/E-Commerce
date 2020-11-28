@@ -6,14 +6,16 @@ const dotenv = require("dotenv").config({ path: __dirname + "../.env" });
 //TODO: check refresh tokens expiry and delete them before gen new one.
 
 module.exports = {
-  generateAccessToken: (userId) => {
+  generateAccessToken: (user) => {
     return new Promise((resolve, reject) => {
-      const payload = {};
+      const payload = {
+        userId: user.id,
+        role: user.role,
+      };
       const secret = process.env.ACC_TOKEN_SECRET;
       const options = {
         expiresIn: "1h",
         issuer: "hcecommerce.com",
-        audience: userId,
       };
       JWT.sign(payload, secret, options, (err, token) => {
         if (err) {
@@ -25,7 +27,7 @@ module.exports = {
       });
     });
   },
-  verifyAccessToken: (req, res, next) => {
+  verifyAccessToken: (req, _res, next) => {
     if (!req.headers["authorization"]) return next(createError.Unauthorized());
     const authorizationHeader = req.headers["authorization"];
     const bearerToken = authorizationHeader.split(" ");
@@ -41,25 +43,27 @@ module.exports = {
     });
   },
 
-  generateRefreshToken: (userId) => {
+  generateRefreshToken: (user) => {
     return new Promise((resolve, reject) => {
-      const payload = {};
+      const payload = {
+        userId: user.id,
+        role: user.role,
+      };
       const secret = process.env.REF_TOKEN_SECRET;
       const options = {
         expiresIn: "1y",
         issuer: "shreyashc.com",
-        audience: userId,
       };
       JWT.sign(payload, secret, options, async (err, token) => {
         if (err) {
           reject(createError.InternalServerError());
         }
 
-        //delete old
-        await RefreshToken.findOneAndDelete({ user: userId });
+        //delete old one
+        await RefreshToken.findOneAndDelete({ user: user.id });
 
         const dbRefresh = new RefreshToken({
-          user: userId,
+          user: user.id,
           token: token,
           expires: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         });
@@ -74,12 +78,12 @@ module.exports = {
       JWT.verify(token, process.env.REF_TOKEN_SECRET, async (err, payload) => {
         if (err) return reject(createError.Unauthorized());
 
-        const userId = payload.aud;
+        const userId = payload.userId;
         const rToken = await RefreshToken.findOne({ user: userId });
 
         if (rToken) {
           if (token === rToken.token) {
-            reslove(userId);
+            reslove(payload);
           }
         }
         reject(createError.Unauthorized());

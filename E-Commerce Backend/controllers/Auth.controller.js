@@ -18,8 +18,8 @@ module.exports = {
       if (!isCorrectPassword) {
         throw createError.BadRequest("Invalid username/password");
       }
-      const accessToken = await generateAccessToken(user.id);
-      const refreshToken = await generateRefreshToken(user.id);
+      const accessToken = await generateAccessToken(user);
+      const refreshToken = await generateRefreshToken(user);
 
       res.send({ accessToken, refreshToken, role: user.role });
     } catch (error) {
@@ -40,8 +40,8 @@ module.exports = {
         role: "customer",
       });
       const savedUser = await user.save();
-      const accessToken = await generateAccessToken(savedUser.id);
-      const refreshToken = await generateRefreshToken(savedUser.id);
+      const accessToken = await generateAccessToken(savedUser);
+      const refreshToken = await generateRefreshToken(savedUser);
       res.send({ accessToken, refreshToken, role: "customer" });
     } catch (error) {
       next(error);
@@ -49,13 +49,17 @@ module.exports = {
   },
   refreshToken: async (req, res, next) => {
     try {
-      console.log(req.body);
       const rToken = req.body.refreshToken;
       if (!rToken) throw createError.BadRequest();
-      const userId = await verifyRefreshToken(rToken);
-      console.log(userId);
-      const accessToken = await generateAccessToken(userId);
-      const refreshToken = await generateRefreshToken(userId);
+      const payload = await verifyRefreshToken(rToken);
+      const accessToken = await generateAccessToken({
+        id: payload.userId,
+        role: payload.role,
+      });
+      const refreshToken = await generateRefreshToken({
+        id: payload.userId,
+        role: payload.role,
+      });
       res.send({ accessToken, refreshToken });
     } catch (error) {
       next(error);
@@ -65,8 +69,8 @@ module.exports = {
     try {
       const { refreshToken } = req.body;
       if (!refreshToken) throw createError.BadRequest();
-      const userId = await verifyRefreshToken(refreshToken);
-      await RefreshToken.findOneAndDelete({ user: userId });
+      const payload = await verifyRefreshToken(refreshToken);
+      await RefreshToken.findOneAndDelete({ user: payload.userId });
       res.sendStatus(204);
     } catch (error) {
       next(error);

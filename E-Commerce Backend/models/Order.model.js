@@ -1,36 +1,29 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+// TODO: Store transaction detaisls
+
 const OrderSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     ref: "user",
   },
-  orders: [
+  products: [
     {
-      paymentStatus: {
-        type: Boolean,
-        default: false,
+      productId: {
+        type: Schema.Types.ObjectId,
+        ref: "product",
       },
-      status: {
-        type: String,
-        default: "ordered", //["ordered"->"dispached/shipped"->"delivered"]
-      },
-      totalAmount: Number,
-      products: [
-        {
-          productId: {
-            type: Schema.Types.ObjectId,
-            ref: "product",
-          },
-          quantity: Number,
-          //incase product gets deleted, later we can use name to repr
-          name: String,
-          price: Number,
-        },
-      ],
+      quantity: Number,
+      name: String,
+      price: Number,
     },
   ],
+  status: {
+    type: String,
+    default: "ordered", //["ordered"->"dispached/shipped"->"delivered"]
+  },
+  totalAmount: Number,
 });
 const Order = mongoose.model("order", OrderSchema);
 module.exports = Order;
