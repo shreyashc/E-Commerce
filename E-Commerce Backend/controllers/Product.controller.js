@@ -10,12 +10,12 @@ module.exports = {
   /**
    * get all product
    */
-  getAllProducts: async (req, res, next) => {
+  getAllProducts: async (_req, res, next) => {
     try {
       const products = await Product.find({}).lean();
       res.send(products);
     } catch (err) {
-      console.log(err.message);
+      next(err);
     }
   },
   getProductById: async (req, res, next) => {
@@ -38,34 +38,38 @@ module.exports = {
    * create a product
    */
   createAProduct: async (req, res, next) => {
-    const {
-      title,
-      short_desc,
-      description,
-      price,
-      inStock,
-      categories,
-    } = req.body;
-    let image_buffer;
-    if (req.file) {
-      image_buffer = fs.readFileSync(
-        path.join(__dirname + "/../uploads/" + req.file.filename)
-      );
+    try {
+      const {
+        title,
+        short_desc,
+        description,
+        price,
+        inStock,
+        categories,
+      } = req.body;
+      let image_buffer;
+      if (req.file) {
+        image_buffer = fs.readFileSync(
+          path.join(__dirname + "/../uploads/" + req.file.filename)
+        );
+      }
+      const product = new Product({
+        title,
+        short_desc,
+        description,
+        price,
+        inStock,
+        categories,
+        image: {
+          data: image_buffer || null,
+          contentType: req.file ? req.file.mimetype : null,
+        },
+      });
+      const result = await product.save();
+      res.send(result);
+    } catch (error) {
+      next(error);
     }
-    const product = new Product({
-      title,
-      short_desc,
-      description,
-      price,
-      inStock,
-      categories,
-      image: {
-        data: image_buffer || null,
-        contentType: req.file ? req.file.mimetype : null,
-      },
-    });
-    const result = await product.save();
-    res.send(result);
   },
 
   /**
