@@ -1,10 +1,12 @@
 const express = require("express");
 const createError = require("http-errors");
 const dotenv = require("dotenv").config();
+const cors = require('cors')
 const app = express();
 
 require("./db/connectMongo")();
 
+app.use(cors())
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 

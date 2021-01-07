@@ -1,0 +1,27 @@
+<div id="wrapper">
+  <div>
+    <h1>Products</h1>
+
+    <div class="products" *ngIf="products | async">
+      <div
+        class="product"
+        *ngFor="let product of products | async"
+        [routerLink]="['product-details/', product._id]"
+      >
+        <div class="product-image">
+          <img
+            *ngIf="product.image && product.image.data"
+            src="data:{{ product.image.contentType }};base64,{{
+              product.image.data
+            }}"
+            alt=""
+          />
+        </div>
+        <div class="product-details">
+          <div class="price">{{ product.price }}</div>
+          <div class="product-name">{{ product.title }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

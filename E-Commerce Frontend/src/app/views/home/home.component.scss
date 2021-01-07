@@ -1,0 +1,20 @@
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: auto;
+  max-width: 95%;
+  justify-content: center;
+}
+
+.product {
+  cursor: pointer;
+  border: 1px solid cornflowerblue;
+}
+.product-image {
+  img {
+    width: 200px;
+    height: 200px;
+    object-fit: scale-down;
+  }
+}
