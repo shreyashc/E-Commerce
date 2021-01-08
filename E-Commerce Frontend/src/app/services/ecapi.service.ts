@@ -10,7 +10,10 @@ export class EcapiService {
   constructor(private http: HttpClient) {}
 
   getAllProducts(): Observable<any> {
-    console.log('api ---');
     return this.http.get(environment.API_URL + 'products');
+  }
+
+  getProduct(id: string): Observable<any> {
+    return this.http.get(environment.API_URL + 'products/' + id);
   }
 }

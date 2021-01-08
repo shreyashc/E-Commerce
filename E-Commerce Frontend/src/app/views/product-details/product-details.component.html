@@ -1,1 +1,25 @@
-<p>product-details works!</p>
+<div class="product" *ngIf="product">
+  <div class="product-image">
+    <img
+      *ngIf="product.image && product.image.data"
+      src="data:{{ product.image.contentType }};base64,{{ product.image.data }}"
+      alt=""
+    />
+  </div>
+  <div class="product-title">
+    {{ product.title }}
+  </div>
+  <div class="product-price">
+    {{ product.price }}
+  </div>
+  <div class="product-short_desc">
+    {{ product.short_desc }}
+  </div>
+  <div class="product-description">
+    {{ product.description }}
+  </div>
+  <div class="action-buttons">
+    <button>Add to cart</button>
+    <button>Buy</button>
+  </div>
+</div>

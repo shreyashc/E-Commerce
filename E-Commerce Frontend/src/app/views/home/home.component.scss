@@ -1,7 +1,7 @@
 .products {
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 100px;
   margin: auto;
   max-width: 95%;
   justify-content: center;
@@ -10,6 +10,7 @@
 .product {
   cursor: pointer;
   border: 1px solid cornflowerblue;
+  margin-bottom: 100px;
 }
 .product-image {
   img {

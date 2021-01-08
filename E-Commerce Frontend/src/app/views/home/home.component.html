@@ -6,7 +6,7 @@
       <div
         class="product"
         *ngFor="let product of products | async"
-        [routerLink]="['product-details/', product._id]"
+        [routerLink]="['/product-details/', product._id]"
       >
         <div class="product-image">
           <img
