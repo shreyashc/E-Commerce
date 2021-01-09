@@ -1,0 +1,24 @@
+<div id="wrapper">
+  <div>
+    <h1>Categories</h1>
+
+    <div class="categories" *ngIf="categories">
+      <div
+        class="category"
+        *ngFor="let category of categories"
+        [routerLink]="['/category-products/', category._id]"
+      >
+        <div class="category-image">
+          <img
+            *ngIf="category.image && category.image.data"
+            src="data:{{ category.image.contentType }};base64,{{
+              category.image.data
+            }}"
+            alt=""
+          />
+        </div>
+        <div class="category-name">{{ category.title }}</div>
+      </div>
+    </div>
+  </div>
+</div>

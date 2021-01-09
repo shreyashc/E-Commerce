@@ -45,7 +45,7 @@ module.exports = {
         description,
         price,
         inStock,
-        categories,
+        category,
       } = req.body;
       let image_buffer;
       if (req.file) {
@@ -59,7 +59,7 @@ module.exports = {
         description,
         price,
         inStock,
-        categories,
+        category,
         image: {
           data: image_buffer || null,
           contentType: req.file ? req.file.mimetype : null,
@@ -119,6 +119,19 @@ module.exports = {
       }
       const result = await Product.deleteOne(product);
       res.send(result);
+    } catch (error) {
+      if (error instanceof mongoose.CastError) {
+        next(createError(400, "Bad Request"));
+        return;
+      }
+      next(error);
+    }
+  },
+  findAllByCategory:async (req, res, next) => {
+    try {
+      let categoryId = req.params.catId;
+      let products = await Product.find({'category':categoryId}).lean();
+      res.send(products);
     } catch (error) {
       if (error instanceof mongoose.CastError) {
         next(createError(400, "Bad Request"));

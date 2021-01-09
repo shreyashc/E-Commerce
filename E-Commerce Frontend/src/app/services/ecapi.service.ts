@@ -16,4 +16,12 @@ export class EcapiService {
   getProduct(id: string): Observable<any> {
     return this.http.get(environment.API_URL + 'products/' + id);
   }
+
+  getAllCategoried(): Observable<any> {
+    return this.http.get(environment.API_URL + 'categories');
+  }
+
+  getProductsOfACategory(id: string): Observable<any> {
+    return this.http.get(environment.API_URL + 'products/category/' + id);
+  }
 }
